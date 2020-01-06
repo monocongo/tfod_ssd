@@ -24,6 +24,14 @@ directories should be appended to the `PYTHONPATH` environment variable:
     $ cd $TFOD/research
     $ export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
     ```
+4. In order to utilize COCO evaluation metrics to evaluate the accuracy of our model 
+during training we'll need to install the COCO Python API into the TensorFlow API:
+    ```
+    $ git clone https://github.com/cocodataset/cocoapi.git
+    $ cd cocoapi/PythonAPI
+    $ sudo make
+    $ cp -r pycocotools $TFOD/models/research/
+    ```
 
 ### Create Python virtual environment
 1. Create a Python virtual environment containing all necessary TensorFlow packages. 
@@ -36,11 +44,11 @@ a [standard Python virtual environment](https://packaging.python.org/guides/inst
     ```
 2. Install the TensorFlow package.
 
-For GPU:
+    For GPU:
     ```
     $ conda install tensorflow-gpu
     ```
-For CPU:
+    For CPU:
     ```
     $ conda install tensorflow
     ```
@@ -140,3 +148,16 @@ from the TensorFlow OD API into another location (in our case a directory named
    ```
    num_examples: 8000
    ```
+   
+   In the `eval_config` section we will comment out the `max_evals` entry and add 
+   the following line to enable the COCO evaluation metrics:
+   ```
+   metrics_set: "coco_detection_metrics"
+   ```
+
+### Train the model
+```
+$ cd $TFOD/research/object_detection
+$ cp $TFOD/research/object_detection/legacy/train.py .
+$ python train.py --train_dir=$EXPERIMENT/training/ --pipeline_config_path=$EXPERIMENT/training/ssd_mobilenet_v2_quantized_300x300_coco.config
+```
