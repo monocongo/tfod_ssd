@@ -55,11 +55,21 @@ For CPU:
     $ conda install --user matplotlib
     ```
 
+### Create an experiment directory
+Create a directory to contain the files used in this "experiment" (dataset, model 
+configuration, class labels, etc.)
+```
+$ mkdir tfod_ssd
+$ cd tfod_ssd
+$ export EXPERIMENT=`pwd`
+```
+
 ### Build a custom dataset
 
 Acquire a dataset in TFRecord format. Datasets with annotation files in other formats 
 can be converted/translated to TFRecord format using the [cvdata](https://github.com/monocongo/cvdata) 
-Python package. 
+Python package. We will create a directory in our experiment directory named `tfrecord`
+for the TFRecord file(s).
 
 As well as the TFRecord file(s) we should also have a labels file in protobuf text 
 format that lists items containing class IDs and their corresponding labels. 
@@ -80,3 +90,53 @@ item {
 }
 ```
 
+### Model configuration
+The model we’ll in this example is the Single Shot Detector(SSD) with MobileNet 
+model (optimized for inference on mobile) pretrained on the COCO dataset called 
+[ssd_mobilenet_v2_quantized_coco](http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_quantized_300x300_coco_2019_01_03.tar.gz) 
+taken from the [TensorFlow Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md).
+
+1. Download and unpack the model archive
+    ```
+    $ wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_quantized_300x300_coco_2019_01_03.tar.gz
+    $ tar -xzf ssd_mobilenet_v2_quantized_300x300_coco_2019_01_03.tar.gz
+    ```
+
+2. Configure the model training configuration file by copying an example configuration 
+from the TensorFlow OD API into another location (in our case a directory named 
+`training`) and modify it for our training dataset.
+    ```
+    $ mkdir $EXPERIMENT/training
+    $ cp $TFOD/research/object_detection/samples/configs/ssd_mobilenet_v2_quantized_300x300_coco.config $EXPERIMENT
+    ```
+   Update the file as follows:
+   
+   Line 9: set the number of classes to the number of labeled classes in our dataset
+   ```
+   num_classes: 5
+   ```
+
+   Line 156: set the path to the checkpoint file we'll use as the starting point for the training
+   ```
+   fine_tune_checkpoint: “/home/james/tfod_ssd/ssd_mobilenet_v2_quantized_300x300_coco_2019_01_03/model.ckpt.data-00000-of-00001"
+   ```
+
+   Line 175: set the path to the training dataset TFRecord file(s)
+   ```
+   input_path: "/home/james/tfod_ssd/tfrecord/train.record-?????-of-00100
+   ``` 
+
+   Line 177 and 191: set the path to the dataset's label map protobuf text file
+   ```
+   label_map_path: "/home/james/tfod_ssd/tfrecord/label_map.pbtxt"
+   ```
+   
+   Line 189: set the path to the evaluation dataset TFRecord file(s)
+   ```
+   input_path: "/home/james/tfod_ssd/tfrecord/eval.record-?????-of-00100
+   ``` 
+   
+   Line 181: set the number of examples in the evaluation dataset
+   ```
+   num_examples: 8000
+   ```
