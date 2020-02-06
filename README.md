@@ -2,16 +2,17 @@
 Usage of the TensorFlow object detection API for training an SSD model using transfer learning with a custom dataset 
 
 ### Install the TensorFlow Object Detection API
-1. Clone the TensorFlow Object Detection API from GitHub and set an environment 
-variable to facilitate referencing the location:
+1. Clone the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) 
+from GitHub and set an environment variable to facilitate referencing the location:
     ```
     $ git clone git@github.com:tensorflow/models.git
     $ cd models
     $ export TFOD=`pwd`
     ```
 
-2. The Tensorflow Object Detection API uses Protobufs to configure model and training 
-parameters. Before the framework can be used, the Protobuf libraries must be compiled: 
+2. The TensorFlow Object Detection API uses [protocol buffer](https://developers.google.com/protocol-buffers) 
+files to configure model and training parameters. Before the framework can be used, 
+the Protobuf libraries must be compiled: 
     ```
     $ sudo apt-get install protobuf-compiler
     $ cd $TFOD/research
