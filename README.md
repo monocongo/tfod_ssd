@@ -157,3 +157,13 @@ $ cd $TFOD/research/object_detection
 $ cp $TFOD/research/object_detection/legacy/train.py .
 $ python train.py --train_dir=$EXPERIMENT/training/ --pipeline_config_path=$EXPERIMENT/training/ssd_mobilenet_v2_quantized_300x300_coco.config
 ```
+### TensorBoard
+In order to monitor the training progress we can run TensorBoard. The various events 
+used by TensorBoard are logged to `$EXPERIMENT/training`, hence we'll launch the 
+program like so:
+```bash
+$ tensorboard --logdir=experiments/tfod_ssd/weapons/training
+```
+By default the port used is 6006, so we'll view the progress of the training on 
+TensorBoard using http://localhost:6006 (replace `localhost` with the public IP 
+address if running the training on a remote/cloud instance).
