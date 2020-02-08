@@ -31,7 +31,7 @@ during training we'll need to install the COCO Python API into the TensorFlow AP
     $ git clone https://github.com/cocodataset/cocoapi.git
     $ cd cocoapi/PythonAPI
     $ sudo make
-    $ cp -r pycocotools $TFOD/models/research/
+    $ cp -r pycocotools $TFOD/research/
     ```
 
 ### Create Python virtual environment
@@ -56,12 +56,7 @@ a [standard Python virtual environment](https://packaging.python.org/guides/inst
 
 3. Install the remaining dependencies:
     ```
-    $ conda install --user Cython
-    $ conda install --user contextlib2
-    $ conda install --user pillow
-    $ conda install --user lxml
-    $ conda install --user jupyter
-    $ conda install --user matplotlib
+    $ conda install contextlib2 Cython jupyter lxml matplotlib pillow
     ```
 
 ### Create an experiment directory
@@ -116,7 +111,7 @@ from the TensorFlow OD API into another location (in our case a directory named
 `training`) and modify it for our training dataset.
     ```
     $ mkdir $EXPERIMENT/training
-    $ cp $TFOD/research/object_detection/samples/configs/ssd_mobilenet_v2_quantized_300x300_coco.config $EXPERIMENT
+    $ cp $TFOD/research/object_detection/samples/configs/ssd_mobilenet_v2_quantized_300x300_coco.config $EXPERIMENT/training
     ```
    Update the file as follows:
    
@@ -127,7 +122,7 @@ from the TensorFlow OD API into another location (in our case a directory named
 
    Line 156: set the path to the checkpoint file we'll use as the starting point for the training
    ```
-   fine_tune_checkpoint: “/home/james/tfod_ssd/ssd_mobilenet_v2_quantized_300x300_coco_2019_01_03/model.ckpt.data-00000-of-00001"
+   fine_tune_checkpoint: “/home/james/tfod_ssd/ssd_mobilenet_v2_quantized_300x300_coco_2019_01_03/model.ckpt"
    ```
 
    Line 175: set the path to the training dataset TFRecord file(s)
