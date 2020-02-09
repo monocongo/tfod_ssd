@@ -112,6 +112,7 @@ from the TensorFlow OD API into another location (in our case a directory named
     ```
     $ mkdir $EXPERIMENT/training
     $ cp $TFOD/research/object_detection/samples/configs/ssd_mobilenet_v2_quantized_300x300_coco.config $EXPERIMENT/training
+    $ export CONFIG=$EXPERIMENT/training/ssd_mobilenet_v2_quantized_300x300_coco.config
     ```
    Update the file as follows:
    
@@ -155,15 +156,28 @@ from the TensorFlow OD API into another location (in our case a directory named
 ```
 $ cd $TFOD/research/object_detection
 $ cp $TFOD/research/object_detection/legacy/train.py .
-$ python train.py --train_dir=$EXPERIMENT/training/ --pipeline_config_path=$EXPERIMENT/training/ssd_mobilenet_v2_quantized_300x300_coco.config
+$ python train.py --train_dir=$EXPERIMENT/training --pipeline_config_path=$CONFIG
 ```
 ### TensorBoard
 In order to monitor the training progress we can run TensorBoard. The various events 
 used by TensorBoard are logged to `$EXPERIMENT/training`, hence we'll launch the 
 program like so:
 ```bash
-$ tensorboard --logdir=experiments/tfod_ssd/weapons/training
+$ tensorboard --logdir=$EXPERIMENT/training
 ```
 By default the port used is 6006, so we'll view the progress of the training on 
 TensorBoard using http://localhost:6006 (replace `localhost` with the public IP 
 address if running the training on a remote/cloud instance).
+
+#### Prepare for inference
+Once we have a checkpoint file (after the model has completed training) then we 
+can export/freeze the inference graph and then optimize for inference. For example, 
+if the final model checkpoint occurs at 9085 steps, resulting in a collection of 
+checkpoint files with prefix `$EXPERIMENT/training/model.ckpt-9085` (including 
+files `model.ckpt-9085.data-00000-of-00001`, `model.ckpt-9085.index`, and 
+`model.ckpt-9085.meta`) then the inference graph is frozen and optimized like so:
+```bash
+$ export EXPORT=$EXPERIMENT/training/export_9085
+$ python $TFOD/research/object_detection/export_inference_graph.py --input_type image_tensor --pipeline_config_path $CONFIG --trained_checkpoint_prefix $EXPERIMENT/training/model.ckpt-9085 --output_directory $EXPORT
+$ python -m tensorflow.python.tools.optimize_for_inference --input=$EXPORT/frozen_inference_graph.pb --output=$EXPORT/optimized_graph.pb --input_names="input" --output_names="final_result"
+```
