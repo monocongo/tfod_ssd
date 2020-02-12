@@ -4,6 +4,7 @@ import os
 
 import arrow
 import cv2
+import imutils
 import numpy as np
 
 from tfod_ssd.common import draw_boxes, write_detections
@@ -117,6 +118,8 @@ def main():
     for image_file_path in image_file_paths:
 
         frame = cv2.imread(image_file_path)
+        if _RESIZE_WIDTH > 0:
+            frame = imutils.resize(frame, width=_RESIZE_WIDTH)
 
         # get the date/time
         time_stamp = arrow.utcnow().timestamp
