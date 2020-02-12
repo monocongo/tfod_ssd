@@ -10,6 +10,12 @@ _BOX_LINE_WIDTH = 2
 # color of bounding boxes
 _BOX_COLOR = (0, 255, 0)
 
+# width of labels (in pixels)
+_LABEL_WIDTH = 2
+
+# color of bounding boxes
+_LABEL_COLOR = (255, 0, 0)
+
 
 # ------------------------------------------------------------------------------
 def draw_boxes(
@@ -48,8 +54,8 @@ def draw_boxes(
                             (detection["start_x"], y),
                             cv2.FONT_HERSHEY_SIMPLEX,
                             0.45,
-                            (0, 255, 0),
-                            2)
+                            _LABEL_COLOR,
+                            _LABEL_WIDTH)
 
     return frame
 
