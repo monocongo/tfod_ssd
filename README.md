@@ -169,7 +169,7 @@ By default the port used is 6006, so we'll view the progress of the training on
 TensorBoard using http://localhost:6006 (replace `localhost` with the public IP 
 address if running the training on a remote/cloud instance).
 
-#### Prepare for inference
+### Prepare for inference
 Once we have a checkpoint file (after the model has completed training) then we 
 can export/freeze the inference graph and then optimize for inference. For example, 
 if the final model checkpoint occurs at 9085 steps, resulting in a collection of 
@@ -180,4 +180,14 @@ files `model.ckpt-9085.data-00000-of-00001`, `model.ckpt-9085.index`, and
 $ export EXPORT=$EXPERIMENT/training/export_9085
 $ python $TFOD/research/object_detection/export_inference_graph.py --input_type image_tensor --pipeline_config_path $CONFIG --trained_checkpoint_prefix $EXPERIMENT/training/model.ckpt-9085 --output_directory $EXPORT
 $ python -m tensorflow.python.tools.optimize_for_inference --input=$EXPORT/frozen_inference_graph.pb --output=$EXPORT/optimized_graph.pb --input_names="input" --output_names="final_result"
+```
+
+### Perform inference
+Utilize the CLI for inference on a single image, collection of images in a directory:
+```bash
+$ python src/tfod_ssd/detect_image.py --fig /home/james/experiments/tfod_ssd/training/export_20000/frozen_inference_graph.pb --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
+```
+Utilize the CLI for inference on a video file, RTSP URL, or webcam:
+```bash
+$ python /home/james/git/tfod_ssd/src/tfod_ssd/detect_video.py --fig /home/james/experiments/tfod_ssd/training/export_20000/frozen_inference_graph.pb --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
 ```
