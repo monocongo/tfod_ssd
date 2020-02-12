@@ -1,8 +1,6 @@
 import argparse
-import csv
 import logging
 import os
-from typing import Dict, List
 
 import arrow
 import cv2
@@ -118,6 +116,8 @@ def main():
 
     for image_file_path in image_file_paths:
 
+        frame = cv2.imread(image_file_path)
+
         # get the date/time
         time_stamp = arrow.utcnow().timestamp
 
@@ -158,7 +158,7 @@ def main():
 
         # display the output frame
         cv2.imshow("Frame", frame)
-        cv2.waitKey(1) & 0xFF
+        cv2.waitKey(0)
 
     # do a bit of cleanup
     cv2.destroyAllWindows()
