@@ -8,23 +8,24 @@ class ObjectDetectorTensorFlow:
 
     def __init__(
             self,
-            path_to_labelmap: str,
-            path_to_checkpoint: str,
+            labelmap: str,
+            frozen_inference_graph: str,
     ):
         """
         Constructor function.
-        :param path_to_labelmap:
-        :param path_to_checkpoint:
+
+        :param labelmap: path to TFRecord labels map prototext file
+        :param frozen_inference_graph: path to frozen inference graph protobuf file
         """
 
         # load the label map
-        self.categories = self._parse_label_map(path_to_labelmap)
+        self.categories = self._parse_label_map(labelmap)
 
         # Load the TensorFlow model into memory
         detection_graph = tf.Graph()
         with detection_graph.as_default():
             od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile(path_to_checkpoint, 'rb') as fid:
+            with tf.gfile.GFile(frozen_inference_graph, 'rb') as fid:
                 serialized_graph = fid.read()
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
@@ -48,6 +49,7 @@ class ObjectDetectorTensorFlow:
     ) -> List[Dict]:
         """
         Get object detections from an image frame.
+
         :param numpy.ndarray frame: BGR image data array with shape
             (height, width, 3), with values in range (0..255), and dtype=uint8
         :param float confidence: minimum detection confidence (probability),
@@ -93,9 +95,19 @@ class ObjectDetectorTensorFlow:
         return detections
 
     @staticmethod
-    def _parse_label_map(path_to_labels: str):
+    def _parse_label_map(
+            labels_map: str,
+    ) -> Dict:
+        """
+        Parses a labels map prototext file into a dictionary mapping class IDs
+        to labels.
+
+        :param labels_map: path to TFRecord labels map file
+        :return: dictionary mapping class IDs to labels
+        """
+
         categories = {}
-        with open(path_to_labels) as label_map:
+        with open(labels_map) as label_map:
 
             for line in label_map:
                 line = line.strip()

@@ -95,10 +95,10 @@ def main():
     # parse the command line arguments
     args_parser = argparse.ArgumentParser()
     args_parser.add_argument(
-        "--checkpoint",
+        "--fig",
         type=str,
         required=True,
-        help="path to TensorFlow model checkpoint",
+        help="path to TensorFlow model frozen inference graph protobuf file",
     )
     args_parser.add_argument(
         "--labelmap",
@@ -147,7 +147,7 @@ def main():
     # load the pre-trained, serialized object detection model
     _logger.info("\n\n\tLoading object detection model...\n")
 
-    object_detector = ObjectDetectorTensorFlow(args["labelmap"], args["checkpoint"])
+    object_detector = ObjectDetectorTensorFlow(args["labelmap"], args["fig"])
 
     # initialize the video stream, wait a few seconds to allow
     # the camera sensor to warm up, and initialize the FPS counter
@@ -258,7 +258,7 @@ if __name__ == "__main__":
     # Usage:
     # ~~~~~~~~~~~~~~~
     #
-    # $ python <this_script.py> --checkpoint model_ckpt_path \
+    # $ python <this_script.py> --fig <frozen_inference_graph.pb> \
     #     --labelmap label_map_prototext_path \
     #     [--videosrc camera_rtsp_url|mp4_file_path|0] \
     #     [--csv results_csv_file_path] \
