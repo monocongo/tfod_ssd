@@ -3,7 +3,6 @@ import logging
 import os
 import time
 
-import arrow
 import cv2
 import imutils
 from imutils.video import FPS
@@ -124,8 +123,7 @@ def main():
     # loop over the frames from the video stream
     while True:
 
-        # grab the frame from the threaded video stream and resize it
-        # to have a maximum width of 400 pixels
+        # read the image frame and resize if necessary
         frame = video_stream.read()
         if _RESIZE_WIDTH > 0:
             frame = imutils.resize(frame, width=_RESIZE_WIDTH)
@@ -143,43 +141,6 @@ def main():
             # add the detections from this frame into the current batch
             if len(detections) > 0:
                 detections_batch += detections
-
-            # # get the date/time
-            # time_stamp = arrow.utcnow().timestamp
-            #
-            # # list of detections for this frame
-            # detections_frame = []
-            #
-            # # get the dimensions
-            # (height, width) = frame.shape[:2]
-            #
-            # # loop over the object detections
-            # object_detections = object_detector.detect(frame, args["confidence"])
-            # for object_detection in object_detections:
-            #
-            #     # compute the detected object's bounding box (x, y)-coordinates
-            #     # NOTE bounding boxes are in order (y0, x0, y1, x1)
-            #     box = object_detection["bounding_box"] * np.array([height, width, height, width])
-            #     (start_y, start_x, end_y, end_x) = box.astype("int")
-            #
-            #     # build a record for the object detection, add to the list
-            #     detection = {
-            #         "time_stamp": time_stamp,
-            #         "class": object_detection["label"],
-            #         "confidence": f'{object_detection["probability"]:.2f}',
-            #         "start_x": start_x,
-            #         "start_y": start_y,
-            #         "end_x": end_x,
-            #         "end_y": end_y,
-            #     }
-            #     detections_frame.append(detection)
-            #
-            # # draw bounding boxes on the frame to indicate detected objects
-            # if len(detections_frame) > 0:
-            #     frame = _draw_boxes(frame, detections_frame)
-            #
-            #     # add the detections from this frame into the current batch
-            #     detections_batch += detections_frame
 
         # update the FPS counter
         fps.update()

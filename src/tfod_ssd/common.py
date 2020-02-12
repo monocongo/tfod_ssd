@@ -74,8 +74,9 @@ def inference(
     drawing bounding boxes with labels on the frame if any detections are
     made and returning a list of dictionaries specifying the detections.
 
-    :param detector:
-    :param frame:
+    :param detector: object detection bject that will be used to perform inferencing
+    :param frame: image frame of BGR pixel values
+    :param confidence_threshold: threshold percentage required for a detection
     :return: the same image frame with bounding boxes drawn if any detections
         were made and a list of dictionary objects specifying the detections
     """
