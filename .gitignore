@@ -130,3 +130,6 @@ dmypy.json
 
 # PyCharm
 .idea
+
+# in case we accidentally store a detections CSV file in our project
+detections.csv
