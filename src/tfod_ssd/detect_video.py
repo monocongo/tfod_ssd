@@ -1,9 +1,7 @@
 import argparse
-import csv
 import logging
 import os
 import time
-from typing import Dict, List
 
 import arrow
 import cv2
@@ -12,6 +10,7 @@ from imutils.video import FPS
 from imutils.video import VideoStream
 import numpy as np
 
+from tfod_ssd.common import draw_boxes, write_detections
 from tfod_ssd.detector import ObjectDetectorTensorFlow
 
 # number of detections we'll batch together into a single write operation
@@ -34,61 +33,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%d  %H:%M:%S",
 )
 _logger = logging.getLogger(__name__)
-
-
-# ------------------------------------------------------------------------------
-def _draw_boxes(frame: np.ndarray,
-                detections: List[Dict]) -> np.ndarray:
-
-    # for each detection draw a corresponding labeled bounding box
-    for detection in detections:
-
-        # draw the bounding box of the face
-        frame = \
-            cv2.rectangle(
-                frame,
-                (detection["start_x"], detection["start_y"]),
-                (detection["end_x"], detection["end_y"]),
-                _BOX_COLOR,
-                _BOX_LINE_WIDTH,
-            )
-
-        # draw the object's label and probability value
-        label = f"{detection['class']}: {int(float(detection['confidence']) * 100)}%"
-        if detection["start_y"] - 10 > 10:
-            y = detection["start_y"] - 10
-        else:
-            y = detection["start_y"] + 10
-        frame = cv2.putText(frame,
-                            label,
-                            (detection["start_x"], y),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.45,
-                            (0, 255, 0),
-                            2)
-
-    return frame
-
-
-# ------------------------------------------------------------------------------
-def _write_detections(
-        detections: List[Dict],
-        detections_csv: str,
-        detection_field_names: List[str],
-):
-    with open(detections_csv, "a") as detections_csv_file:
-        detection_csv_writer = csv.DictWriter(
-            detections_csv_file,
-            fieldnames=detection_field_names,
-            delimiter=',',
-            quotechar='"',
-            quoting=csv.QUOTE_MINIMAL,
-        )
-
-        # write each detection record (dictionary) into a CSV file
-        for detection in detections:
-            detection_csv_writer.writerow(detection)
-        detections_csv_file.flush()
 
 
 # ------------------------------------------------------------------------------
@@ -227,7 +171,7 @@ def main():
 
             # draw bounding boxes on the frame to indicate detected objects
             if len(detections_frame) > 0:
-                frame = _draw_boxes(frame, detections_frame)
+                frame = draw_boxes(frame, detections_frame)
 
                 # add the detections from this frame into the current batch
                 detections_batch += detections_frame
@@ -241,7 +185,7 @@ def main():
         # if we've collected a batch of detections then write them to CSV
         if len(detections_batch) > _DETECTIONS_BATCH_SIZE:
 
-            _write_detections(detections_batch, args["csv"], detection_field_names)
+            write_detections(detections_batch, args["csv"], detection_field_names)
             detections_batch = []
 
         # if the `q` key was pressed, break from the loop
