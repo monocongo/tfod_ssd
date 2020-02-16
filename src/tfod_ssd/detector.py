@@ -9,23 +9,23 @@ class ObjectDetectorTensorFlow:
     def __init__(
             self,
             labelmap: str,
-            frozen_inference_graph: str,
+            inference_graph: str,
     ):
         """
         Constructor function.
 
         :param labelmap: path to TFRecord labels map prototext file
-        :param frozen_inference_graph: path to frozen inference graph protobuf file
+        :param inference_graph: path to inference graph protobuf file
         """
 
         # load the label map
         self.categories = self._parse_label_map(labelmap)
 
-        # Load the TensorFlow model into memory
+        # load the TensorFlow model (graph) into memory
         detection_graph = tf.Graph()
         with detection_graph.as_default():
             od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile(frozen_inference_graph, 'rb') as fid:
+            with tf.gfile.GFile(inference_graph, 'rb') as fid:
                 serialized_graph = fid.read()
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
