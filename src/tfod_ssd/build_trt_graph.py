@@ -87,7 +87,7 @@ def main():
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     # USAGE
-    # python optimize.py --config $EXPERIMENT/config/ssd_mobilenet_v2_quantized_300x300_coco.config \
+    # python build_trt_graph.py --config $EXPERIMENT/config/ssd_mobilenet_v2_quantized_300x300_coco.config \
     #     --checkpoint $EXPERIMENT/training/model.ckpt-45765 \
     #     --confidence 0.5 \
     #     --trt_graph $EXPERIMENT/trt/ssd_mobilenet_v2_quantized_300x300_coco_trt.pb
