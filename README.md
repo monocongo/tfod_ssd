@@ -191,3 +191,15 @@ Utilize the CLI for inference on a video file, RTSP URL, or webcam:
 ```bash
 $ python /home/james/git/tfod_ssd/src/tfod_ssd/detect_video.py --fig /home/james/experiments/tfod_ssd/training/export_20000/frozen_inference_graph.pb --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
 ```
+
+### Optimization for Jetson Nano
+In order to deploy on an NIVDIA Jetson Nano device we need to build and optimize 
+a graph using [TensorRT](https://developer.nvidia.com/tensorrt).
+1. Install the [NVIDIA TensorFlow/TensorRT](https://github.com/NVIDIA-AI-IOT/tf_trt_models) 
+package:
+    ```bash
+   $ cd ${GIT_DIR}
+   $ git clone --recursive https://github.com/NVIDIA-Jetson/tf_trt_models.git
+   $ cd tf_trt_models
+   $ ./install.sh python3
+   ```   
