@@ -178,23 +178,24 @@ files `model.ckpt-9085.data-00000-of-00001`, `model.ckpt-9085.index`, and
 `model.ckpt-9085.meta`) then the inference graph is frozen and optimized like so:
 ```bash
 $ export EXPORT=$EXPERIMENT/training/export_9085
-$ python $TFOD/research/object_detection/export_inference_graph.py --input_type image_tensor --pipeline_config_path $CONFIG --trained_checkpoint_prefix $EXPERIMENT/training/model.ckpt-9085 --output_directory $EXPORT
-$ python -m tensorflow.python.tools.optimize_for_inference --input=$EXPORT/frozen_inference_graph.pb --output=$EXPORT/optimized_graph.pb --input_names="input" --output_names="final_result"
+$ export CHECKPOINT=$EXPERIMENT/training/model.ckpt-9085
+$ python $TFOD/research/object_detection/export_inference_graph.py --input_type image_tensor --pipeline_config_path $CONFIG --trained_checkpoint_prefix $CHECKPOINT --output_directory $EXPORT
+$ export GRAPH=$EXPORT/frozen_inference_graph.pb
 ```
 
 ### Perform inference
 Utilize the CLI for inference on a single image, collection of images in a directory:
 ```bash
-$ python src/tfod_ssd/detect_image.py --fig /home/james/experiments/tfod_ssd/training/export_20000/frozen_inference_graph.pb --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
+$ python src/tfod_ssd/detect_image.py --graph $GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
 ```
 Utilize the CLI for inference on a video file, RTSP URL, or webcam:
 ```bash
-$ python /home/james/git/tfod_ssd/src/tfod_ssd/detect_video.py --fig /home/james/experiments/tfod_ssd/training/export_20000/frozen_inference_graph.pb --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
+$ python src/tfod_ssd/detect_video.py --graph $GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
 ```
 
-### Optimization for Jetson Nano
-In order to deploy on an NIVDIA Jetson Nano device we need to build and optimize 
-a graph using [TensorRT](https://developer.nvidia.com/tensorrt).
+### Optimization for NVIDIA Jetson
+In order to deploy on an NIVDIA Jetson Nano or TX2 device we need to build and 
+optimize a graph using the [TensorRT SDK](https://developer.nvidia.com/tensorrt).
 1. Install the [NVIDIA TensorFlow/TensorRT](https://github.com/NVIDIA-AI-IOT/tf_trt_models) 
 package:
     ```bash
@@ -202,4 +203,28 @@ package:
    $ git clone --recursive https://github.com/NVIDIA-Jetson/tf_trt_models.git
    $ cd tf_trt_models
    $ ./install.sh python3
-   ```   
+   ```
+2. Build an inference graph optimized for TensorRT from the model configuration 
+and checkpoint files:
+   ```bash
+   $ export TRT_GRAPH=$EXPORT/ssd_mobilenet_v2_quantized_300x300_coco_trt.pb
+   $ python optimize.py --config $CONFIG \
+        --checkpoint $CHECKPOINT \
+        --confidence 0.5 \
+        --trt_graph $TRT_GRAPH 
+   ```
+   *NOTE*: the above needs to be performed on the target platform where the object 
+   detection application will be deployed so that the graph is optimized for the 
+   appropriate NVIDIA GPU. 
+   
+At this point we can now run the object detection script(s) utilizing the TensorRT 
+optimized graph:
+
+Utilize the CLI for inference on a single image, collection of images in a directory:
+```bash
+$ python src/tfod_ssd/detect_image.py --graph $TRT_GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
+```
+Utilize the CLI for inference on a video file, RTSP URL, or webcam:
+```bash
+$ python src/tfod_ssd/detect_video.py --graph $TRT_GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
+```
