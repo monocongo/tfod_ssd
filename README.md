@@ -5,6 +5,8 @@ Usage of the TensorFlow object detection API for training an SSD model using tra
 1. Clone the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) 
 from GitHub and set an environment variable to facilitate referencing the location:
     ```
+    $ export GIT=<your_local_git_base_directory>
+    $ cd $GIT
     $ git clone git@github.com:tensorflow/models.git
     $ cd models
     $ export TFOD=`pwd`
@@ -54,11 +56,14 @@ a [standard Python virtual environment](https://packaging.python.org/guides/inst
     $ conda install tensorflow
     ```
 
-3. Install the remaining dependencies:
+3. Install this project:
     ```
-    $ conda install contextlib2 Cython jupyter lxml matplotlib pillow
+    $ cd $GIT
+    $ git clone git@github.com:monocongo/tfod_ssd.git
+    $ cd tfod_ssd
+    $ pip install -e .
     ```
-
+   
 ### Create an experiment directory
 Create a directory to contain the files used in this "experiment" (dataset, model 
 configuration, class labels, etc.)
@@ -186,14 +191,14 @@ $ export GRAPH=$EXPORT/frozen_inference_graph.pb
 ### Perform inference
 Utilize the CLI for inference on a single image, collection of images in a directory:
 ```bash
-$ python src/tfod_ssd/detect_image.py --graph $GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
+$ object_detect_images --graph $GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
 ```
 Utilize the CLI for inference on a video file, RTSP URL, or webcam:
 ```bash
-$ python src/tfod_ssd/detect_video.py --graph $GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
+$ object_detect_video --graph $GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
 ```
 
-### Optimization for NVIDIA Jetson
+### Optimization for NVIDIA Jetson (optional)
 In order to deploy on an NIVDIA Jetson Nano or TX2 device we need to build and 
 optimize a graph using the [TensorRT SDK](https://developer.nvidia.com/tensorrt).
 1. Install the [NVIDIA TensorFlow/TensorRT](https://github.com/NVIDIA-AI-IOT/tf_trt_models) 
@@ -208,7 +213,7 @@ package:
 and checkpoint files:
    ```bash
    $ export TRT_GRAPH=$EXPORT/ssd_mobilenet_v2_quantized_300x300_coco_trt.pb
-   $ python optimize.py --config $CONFIG \
+   $ build_trt_graph --config $CONFIG \
         --checkpoint $CHECKPOINT \
         --confidence 0.5 \
         --trt_graph $TRT_GRAPH 
@@ -222,9 +227,9 @@ optimized graph:
 
 Utilize the CLI for inference on a single image, collection of images in a directory:
 ```bash
-$ python src/tfod_ssd/detect_image.py --graph $TRT_GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
+$ object_detect_images --graph $TRT_GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --images /home/james/data/test/imgs /home/james/data/test/rifle_00827.jpg
 ```
 Utilize the CLI for inference on a video file, RTSP URL, or webcam:
 ```bash
-$ python src/tfod_ssd/detect_video.py --graph $TRT_GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
+$ object_detect_video --graph $TRT_GRAPH --labelmap /home/james/experiments/tfod_ssd/tfrecord_label_map.prototxt --videosrc example.mp4
 ```
