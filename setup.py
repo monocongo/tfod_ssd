@@ -37,7 +37,7 @@ setup(
         "opencv-python",
         "numpy",
         "pillow",
-        "tensorflow=1",
+        "tensorflow>=1.15.2",
     ],
     entry_points={
         "console_scripts": [
