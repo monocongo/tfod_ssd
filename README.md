@@ -5,8 +5,6 @@ Usage of the TensorFlow object detection API for training an SSD model using tra
 1. Clone the [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) 
 from GitHub and set an environment variable to facilitate referencing the location:
     ```
-    $ export GIT=<your_local_git_base_directory>
-    $ cd $GIT
     $ git clone git@github.com:tensorflow/models.git
     $ cd models
     $ export TFOD=`pwd`
@@ -42,23 +40,11 @@ In this example we'll use an environment created and managed using
 [Anaconda](https://www.anaconda.com/distribution/) but it's also possible to use 
 a [standard Python virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/).
     ```
-    $ conda create -n tfod_ssd python=3 --yes
+    $ conda create -n tfod_ssd python=3.7 --yes
     $ conda activate tfod_ssd
     ```
-2. Install the TensorFlow package.
-
-    For GPU:
+2. Install this project:
     ```
-    $ conda install tensorflow-gpu
-    ```
-    For CPU:
-    ```
-    $ conda install tensorflow
-    ```
-
-3. Install this project:
-    ```
-    $ cd $GIT
     $ git clone git@github.com:monocongo/tfod_ssd.git
     $ cd tfod_ssd
     $ pip install -e .
