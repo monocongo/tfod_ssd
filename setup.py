@@ -37,7 +37,7 @@ setup(
         "opencv-python",
         "numpy",
         "pillow",
-        "tensorflow=1",
+        "tensorflow-gpu==1.15.*",
     ],
     entry_points={
         "console_scripts": [
