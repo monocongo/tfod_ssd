@@ -24,6 +24,10 @@ _BOX_LINE_WIDTH = 2
 # color of bounding boxes
 _BOX_COLOR = (0, 255, 0)
 
+# the number of times we'll retry pulling a frame from the video
+# source before giving up and assuming we've reached then end
+_MAX_RETRIES = 10
+
 # ------------------------------------------------------------------------------
 # set up a basic, global logger object which will write to the console
 logging.basicConfig(
@@ -77,6 +81,12 @@ def main():
         default="detections.csv",
         help="path to results CSV file",
     )
+    args_parser.add_argument(
+        "--out_dir",
+        type=str,
+        required=False,
+        help="path to directory where detection images should be written",
+    )
     args = vars(args_parser.parse_args())
 
     # we'll write detection info to CSV using the following columns
@@ -98,6 +108,16 @@ def main():
     _logger.info("\n\n\tLoading object detection model...\n")
     object_detector = ObjectDetectorTensorFlow(args["labelmap"], args["graph"])
 
+    # if we've specified to output images then we create the output directory,
+    # initialize an output image count, and get a base name for the images
+    if args["out_dir"] is not None:
+        os.makedirs(args["out_dir"], exist_ok=True)
+        detection_frame_count = 0
+        if args["videosrc"] == "0":
+            base_name = "webcam"
+        else:
+            base_name = os.path.splitext(os.path.split(args["videosrc"])[-1])[0]
+
     # initialize the video stream, wait a few seconds to allow
     # the camera sensor to warm up, and initialize the FPS counter
     _logger.info("starting video stream...")
@@ -115,6 +135,9 @@ def main():
     if _RESIZE_WIDTH > 0:
         previous_frame = imutils.resize(previous_frame, width=_RESIZE_WIDTH)
 
+    # flag for keeping a count of retries
+    retries = 0
+
     # a list of detection (dictionary) records -- when this list
     # fills up to or above the batch size then we'll write the
     # entire list to our CSV file or add to the database
@@ -125,10 +148,20 @@ def main():
 
         # read the image frame and resize if necessary
         frame = video_stream.read()
+        if frame is None:
+            retries += 1
+            if retries > _MAX_RETRIES:
+                break
+            else:
+                continue
+        else:
+            retries = 0
+
         if _RESIZE_WIDTH > 0:
             frame = imutils.resize(frame, width=_RESIZE_WIDTH)
 
         # only perform detection if we've read a significantly different frame
+        detections_made = False
         difference = np.sum(np.absolute(frame - previous_frame)) / np.size(frame)
         if difference > 50:
 
@@ -141,6 +174,8 @@ def main():
             # add the detections from this frame into the current batch
             if len(detections) > 0:
                 detections_batch += detections
+                detection_frame_count += 1
+                detections_made = True
 
         # update the FPS counter
         fps.update()
@@ -150,6 +185,13 @@ def main():
         # display the output frame
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
+
+        # write the detection frame
+        if detections_made and (args["out_dir"] is not None):
+            detection_image_path = os.path.join(
+                args["out_dir"], f"{base_name}_{detection_frame_count}.jpg",
+            )
+            cv2.imwrite(detection_image_path, frame)
 
         # if we've collected a batch of detections then write them to CSV
         if len(detections_batch) > _DETECTIONS_BATCH_SIZE:
