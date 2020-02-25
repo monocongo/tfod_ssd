@@ -24,6 +24,10 @@ _BOX_LINE_WIDTH = 2
 # color of bounding boxes
 _BOX_COLOR = (0, 255, 0)
 
+# the number of times we'll retry pulling a frame from the video
+# source before giving up and assuming we've reached then end
+_MAX_RETRIES = 10
+
 # ------------------------------------------------------------------------------
 # set up a basic, global logger object which will write to the console
 logging.basicConfig(
@@ -112,7 +116,7 @@ def main():
         if args["videosrc"] == "0":
             base_name = "webcam"
         else:
-            base_name = os.path.split(args["videosrc"])[-2]
+            base_name = os.path.splitext(os.path.split(args["videosrc"])[-1])[0]
 
     # initialize the video stream, wait a few seconds to allow
     # the camera sensor to warm up, and initialize the FPS counter
@@ -131,6 +135,9 @@ def main():
     if _RESIZE_WIDTH > 0:
         previous_frame = imutils.resize(previous_frame, width=_RESIZE_WIDTH)
 
+    # flag for keeping a count of retries
+    retries = 0
+
     # a list of detection (dictionary) records -- when this list
     # fills up to or above the batch size then we'll write the
     # entire list to our CSV file or add to the database
@@ -141,6 +148,15 @@ def main():
 
         # read the image frame and resize if necessary
         frame = video_stream.read()
+        if frame is None:
+            retries += 1
+            if retries > _MAX_RETRIES:
+                break
+            else:
+                continue
+        else:
+            retries = 0
+
         if _RESIZE_WIDTH > 0:
             frame = imutils.resize(frame, width=_RESIZE_WIDTH)
 
